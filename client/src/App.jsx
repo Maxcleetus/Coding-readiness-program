@@ -5,6 +5,7 @@ import Questions from './pages/Questions';
 import Today from './pages/Today';
 import Antigravity from './components/Antigravity';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 
 
 
@@ -12,8 +13,8 @@ function App() {
   return (
     <div>
       <div style={{
-        background: "black",
-        zIndex: '-1',
+        background: "transparent",
+        zIndex: '10',
         width: '100%',
         height: '100vh',
         position: 'fixed'
@@ -37,6 +38,7 @@ function App() {
         <Route path="/questions" element={<Questions />} />
         <Route path="/today" element={<Today />} />
       </Routes>
+      <Footer/>
     </div>
   );
 }

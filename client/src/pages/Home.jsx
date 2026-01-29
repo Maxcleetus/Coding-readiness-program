@@ -1,10 +1,11 @@
 import React from 'react'
-import Navbar from '../components/Navbar'
 import Hero from '../components/Hero'
+import LeaderBoard from '../components/LeaderBoard'
 const Home = () => {
   return (
     <div>
         <Hero/>
+        <LeaderBoard/>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const ADMIN_TOKEN_KEY = 'admin_token';
 
 const buildUrl = (path) => new URL(`${API_BASE_URL}${path}`, window.location.origin).toString();
@@ -9,7 +9,11 @@ const clearAuthToken = () => localStorage.removeItem(ADMIN_TOKEN_KEY);
 
 const fetchJson = async (path, options = {}) => {
   const { method = 'GET', body, auth = false } = options;
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = {};
+
+  if (body) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (auth) {
     const token = getAuthToken();
@@ -29,7 +33,7 @@ const fetchJson = async (path, options = {}) => {
     try {
       const error = await response.json();
       message = error.message || message;
-    } catch (_error) {
+    } catch {
       // keep fallback message
     }
     throw new Error(message);
@@ -63,4 +67,3 @@ export const api = {
   setAuthToken,
   clearAuthToken,
 };
-

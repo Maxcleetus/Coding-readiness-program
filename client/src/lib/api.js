@@ -16,7 +16,11 @@ const buildUrl = (path, params) => {
 
 const fetchJson = async (path, options = {}) => {
   const { params, method = 'GET', body } = options;
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = {};
+
+  if (body) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const response = await fetch(buildUrl(path, params), {
     method,

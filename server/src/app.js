@@ -12,17 +12,30 @@ import { seedDatabase } from './seed.js';
 const app = express();
 let initPromise;
 
+const normalizeOrigin = (origin) => (origin || '').trim().replace(/\/+$/, '');
+
 const allowedOrigins = [
   process.env.CLIENT_ORIGIN,
   process.env.ADMIN_ORIGIN,
   ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : []),
 ]
   .filter(Boolean)
-  .map((origin) => origin.trim());
+  .map((origin) => normalizeOrigin(origin));
+
+export const isOriginAllowed = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.length === 0) return true;
+  return allowedOrigins.includes(normalizeOrigin(origin));
+};
 
 app.use(
   cors({
-    origin: allowedOrigins.length === 0 ? '*' : allowedOrigins,
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
   })
 );

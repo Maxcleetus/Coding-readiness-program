@@ -6,11 +6,10 @@ import AdminUser from './models/AdminUser.js';
 import { challengeSeed, leaderboardSeed, questionSeed } from './data/seedData.js';
 
 export const seedDatabase = async () => {
-  const [challengeCount, questionCount, leaderboardCount, adminCount] = await Promise.all([
+  const [challengeCount, questionCount, leaderboardCount] = await Promise.all([
     Challenge.countDocuments(),
     Question.countDocuments(),
     LeaderboardEntry.countDocuments(),
-    AdminUser.countDocuments(),
   ]);
 
   const jobs = [];
@@ -27,18 +26,29 @@ export const seedDatabase = async () => {
     jobs.push(LeaderboardEntry.insertMany(leaderboardSeed));
   }
 
-  if (adminCount === 0) {
-    const username = process.env.ADMIN_USERNAME || 'admin';
-    const password = process.env.ADMIN_PASSWORD || 'admin123';
-    const passwordHash = await bcrypt.hash(password, 10);
+  const username = (process.env.ADMIN_USERNAME || 'admin').trim();
+  const password = String(process.env.ADMIN_PASSWORD || 'admin123');
+  const existingAdmin = await AdminUser.findOne({ username });
+  const nextPasswordHash = await bcrypt.hash(password, 10);
 
+  if (!existingAdmin) {
     jobs.push(
       AdminUser.create({
         username,
-        passwordHash,
+        passwordHash: nextPasswordHash,
         role: 'admin',
       })
     );
+  } else {
+    const matches = await bcrypt.compare(password, existingAdmin.passwordHash);
+    if (!matches) {
+      jobs.push(
+        AdminUser.updateOne(
+          { _id: existingAdmin._id },
+          { $set: { passwordHash: nextPasswordHash } }
+        )
+      );
+    }
   }
 
   if (jobs.length > 0) {

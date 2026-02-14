@@ -1,7 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 
 const buildUrl = (path, params) => {
-  const url = new URL(`${API_BASE_URL}${path}`, window.location.origin);
+  const normalizedPath = String(path).replace(/^\/+/, '');
+  const url = new URL(`${API_BASE_URL}/${normalizedPath}`, window.location.origin);
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {

@@ -1,7 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
 const ADMIN_TOKEN_KEY = 'admin_token';
 
-const buildUrl = (path) => new URL(`${API_BASE_URL}${path}`, window.location.origin).toString();
+const buildUrl = (path) =>
+  new URL(`${API_BASE_URL}/${String(path).replace(/^\/+/, '')}`, window.location.origin).toString();
 
 const getAuthToken = () => localStorage.getItem(ADMIN_TOKEN_KEY) || '';
 const setAuthToken = (token) => localStorage.setItem(ADMIN_TOKEN_KEY, token);

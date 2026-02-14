@@ -13,6 +13,8 @@ const app = express();
 let initPromise;
 
 const normalizeOrigin = (origin) => (origin || '').trim().replace(/\/+$/, '');
+const isCodingReadinessVercelOrigin = (origin) =>
+  /^https:\/\/coding-readiness-program(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(origin);
 
 const allowedOrigins = [
   process.env.CLIENT_ORIGIN,
@@ -24,8 +26,15 @@ const allowedOrigins = [
 
 export const isOriginAllowed = (origin) => {
   if (!origin) return true;
+  const normalizedOrigin = normalizeOrigin(origin);
+
+  if (allowedOrigins.includes(normalizedOrigin)) return true;
+
+  // Allow all Coding Readiness Vercel domains (prod + preview/admin subprojects).
+  if (isCodingReadinessVercelOrigin(normalizedOrigin)) return true;
+
   if (allowedOrigins.length === 0) return true;
-  return allowedOrigins.includes(normalizeOrigin(origin));
+  return false;
 };
 
 app.use(

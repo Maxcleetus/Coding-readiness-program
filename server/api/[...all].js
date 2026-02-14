@@ -1,8 +1,15 @@
 import app, { initializeApp, isOriginAllowed } from '../src/app.js';
 
+const isTrustedRuntimeOrigin = (origin) =>
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/i.test(origin) || /^http:\/\/localhost:\d+$/i.test(origin);
+
 const applyCorsHeaders = (req, res) => {
   const origin = req.headers.origin;
-  if (!origin || !isOriginAllowed(origin)) {
+  if (!origin) {
+    return;
+  }
+
+  if (!isOriginAllowed(origin) && !isTrustedRuntimeOrigin(origin)) {
     return;
   }
 

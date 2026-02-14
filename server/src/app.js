@@ -12,40 +12,14 @@ import { seedDatabase } from './seed.js';
 const app = express();
 let initPromise;
 
-const normalizeOrigin = (origin) => (origin || '').trim().replace(/\/+$/, '');
-const isCodingReadinessVercelOrigin = (origin) =>
-  /^https:\/\/coding-readiness-program(?:-[a-z0-9-]+)?\.vercel\.app$/i.test(origin);
-
-const allowedOrigins = [
-  process.env.CLIENT_ORIGIN,
-  process.env.ADMIN_ORIGIN,
-  ...(process.env.CORS_ORIGINS ? process.env.CORS_ORIGINS.split(',') : []),
-]
-  .filter(Boolean)
-  .map((origin) => normalizeOrigin(origin));
-
-export const isOriginAllowed = (origin) => {
-  if (!origin) return true;
-  const normalizedOrigin = normalizeOrigin(origin);
-
-  if (allowedOrigins.includes(normalizedOrigin)) return true;
-
-  // Allow all Coding Readiness Vercel domains (prod + preview/admin subprojects).
-  if (isCodingReadinessVercelOrigin(normalizedOrigin)) return true;
-
-  if (allowedOrigins.length === 0) return true;
-  return false;
-};
+export const isOriginAllowed = () => true;
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (isOriginAllowed(origin)) {
-        return callback(null, true);
-      }
-      return callback(null, false);
-    },
-    credentials: true,
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    optionsSuccessStatus: 200,
   })
 );
 app.use(express.json());

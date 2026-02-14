@@ -1,5 +1,12 @@
-const rawApiBaseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '');
-const API_BASE_URL = rawApiBaseUrl.endsWith('/api') ? rawApiBaseUrl : `${rawApiBaseUrl}/api`;
+const normalizeApiBaseUrl = (value) => {
+  const raw = String(value || '').trim().replace(/\/+$/, '');
+  if (!raw) {
+    return '/api';
+  }
+  return raw.endsWith('/api') ? raw : `${raw}/api`;
+};
+
+const API_BASE_URL = normalizeApiBaseUrl(import.meta.env.VITE_API_BASE_URL);
 const ADMIN_TOKEN_KEY = 'admin_token';
 
 const buildUrl = (path) =>

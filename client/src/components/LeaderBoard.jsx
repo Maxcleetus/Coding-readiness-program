@@ -1,31 +1,38 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Trophy, Users, User, Medal, ArrowUpRight, ChevronDown } from 'lucide-react';
+import { Trophy, Users, User, ChevronDown } from 'lucide-react';
 import gsap from 'gsap';
+import { api } from '../lib/api';
 
 const LeaderBoard = () => {
   const [activeTab, setActiveTab] = useState('students');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [studentData, setStudentData] = useState([]);
+  const [groupData, setGroupData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const containerRef = useRef(null);
 
-  // Mock Data
-  const studentData = [
-    { rank: 1, name: "Alex Rivera", points: 2850, solves: 142, level: "Platinum" },
-    { rank: 2, name: "Sarah Chen", points: 2720, solves: 138, level: "Platinum" },
-    { rank: 3, name: "Jordan Smit", points: 2600, solves: 120, level: "Gold" },
-    { rank: 4, name: "Priya Das", points: 2450, solves: 115, level: "Gold" },
-    { rank: 5, name: "Marcus Lee", points: 2300, solves: 110, level: "Silver" },
-    { rank: 6, name: "Elena Rodriguez", points: 2100, solves: 98, level: "Silver" },
-    { rank: 7, name: "Sam Wilson", points: 1950, solves: 85, level: "Bronze" },
-  ];
+  useEffect(() => {
+    const loadBoard = async () => {
+      setIsLoading(true);
+      setError('');
 
-  const groupData = [
-    { rank: 1, name: "Neural Knights", points: 12400, members: 5, growth: "+12%" },
-    { rank: 2, name: "Binary Beasts", points: 11200, members: 4, growth: "+8%" },
-    { rank: 3, name: "Logic Lords", points: 9800, members: 6, growth: "+5%" },
-    { rank: 4, name: "Code Crusaders", points: 8900, members: 4, growth: "+10%" },
-    { rank: 5, name: "Dev Dynamos", points: 7600, members: 5, growth: "+3%" },
-    { rank: 6, name: "Stack Stars", points: 5400, members: 3, growth: "+1%" },
-  ];
+      try {
+        const [students, groups] = await Promise.all([
+          api.getLeaderboard('students'),
+          api.getLeaderboard('groups'),
+        ]);
+        setStudentData(students);
+        setGroupData(groups);
+      } catch (err) {
+        setError(err.message || 'Failed to load leaderboard');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadBoard();
+  }, []);
 
   // Animation logic
   useEffect(() => {
@@ -84,7 +91,12 @@ const LeaderBoard = () => {
 
         {/* Board Table */}
         <div className="space-y-3">
-          {visibleData.map((item) => (
+          {isLoading && <div className="text-gray-500 text-sm">Loading rankings...</div>}
+          {!isLoading && error && <div className="text-red-400 text-sm">{error}</div>}
+
+          {!isLoading &&
+            !error &&
+            visibleData.map((item) => (
             <div 
               key={`${activeTab}-${item.rank}`}
               className="board-item group flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] hover:border-blue-500/30 transition-all duration-300"
@@ -100,22 +112,16 @@ const LeaderBoard = () => {
                 <div>
                   <h3 className="font-medium text-gray-200">{item.name}</h3>
                   <p className="text-[10px] text-gray-500 uppercase tracking-widest">
-                    {activeTab === 'students' ? `${item.level} Division` : `${item.members} Active Members`}
+                    {activeTab === 'students' ? `${item.solves} Solves` : `${item.members} Active Members`}
                   </p>
                 </div>
               </div>
               
               <div className="flex items-center gap-8">
-                {activeTab === 'students' ? (
+                {activeTab === 'students' && (
                   <div className="text-right hidden sm:block">
                     <p className="text-xs text-gray-500 uppercase">Solves</p>
                     <p className="font-medium text-gray-300">{item.solves}</p>
-                  </div>
-                ) : (
-                  <div className="hidden md:block text-right">
-                    <span className="text-emerald-500 text-xs font-medium flex items-center justify-end gap-1">
-                      <ArrowUpRight size={12} /> {item.growth}
-                    </span>
                   </div>
                 )}
                 <div className="text-right min-w-[80px]">
@@ -142,8 +148,8 @@ const LeaderBoard = () => {
           </div>
         )}
 
-        <div className="mt-16 text-center text-gray-600 text-[10px] uppercase tracking-[0.3em] font-medium opacity-50">
-          Ranks are updated every 24 hours
+        <div className="mt-16 text-center text-blue-200 text-[10px] uppercase tracking-[0.3em] font-semibold opacity-100">
+          Ranks update automatically when scores change
         </div>
       </div>
     </div>

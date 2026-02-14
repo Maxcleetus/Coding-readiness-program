@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Zap, ShieldCheck, Terminal } from 'lucide-react';
+import { ChevronRight, Zap, ShieldCheck } from 'lucide-react';
 import gsap from 'gsap';
 
 const Hero = () => {
@@ -96,7 +96,7 @@ const Hero = () => {
           {/* Action Buttons - Fixed Visibility and Z-Index */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 relative z-50 w-full sm:w-auto">
             <button 
-              onClick={() => navigate('/practice')}
+              onClick={() => navigate('/questions')}
               className="btn-reveal w-full sm:w-auto group relative px-10 py-5 bg-white text-black rounded-2xl font-medium text-lg transition-all hover:bg-blue-500 hover:text-white active:scale-95 flex items-center justify-center gap-3 cursor-pointer"
             >
               <span className="flex items-center gap-2">
@@ -106,7 +106,7 @@ const Hero = () => {
             </button>
 
             <button 
-              onClick={() => navigate('/curriculum')}
+              onClick={() => navigate('/today')}
               className="btn-reveal w-full sm:w-auto px-10 py-5 border border-white/20 hover:border-white hover:bg-white/[0.05] rounded-2xl font-medium text-lg transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
               <Zap size={18} className="text-yellow-500" />

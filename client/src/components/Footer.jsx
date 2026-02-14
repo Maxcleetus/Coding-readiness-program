@@ -1,16 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Terminal, Github, Twitter, Linkedin, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { Github, Twitter, Linkedin, ArrowUpRight, ShieldCheck } from 'lucide-react';
 
 const Footer = () => {
     const navigate = useNavigate();
     const currentYear = new Date().getFullYear();
 
     const footerLinks = [
-        { name: 'Practice', path: '/practice' },
-        { name: 'Curriculum', path: '/curriculum' },
-        { name: 'Leaderboard', path: '/leaderboard' },
-        { name: 'Community', path: '/community' },
+        { name: 'Practice', path: '/questions' },
+        { name: 'Daily Challenge', path: '/today' },
+        { name: 'Home', path: '/' },
     ];
 
     return (

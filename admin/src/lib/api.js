@@ -66,6 +66,8 @@ export const api = {
   updateQuestion: (id, body) =>
     fetchJson(`/admin/questions/${id}`, { method: 'PUT', body, auth: true }),
   deleteQuestion: (id) => fetchJson(`/admin/questions/${id}`, { method: 'DELETE', auth: true }),
+  updateCompetitionWinner: (body) =>
+    fetchJson('/admin/competition-winner', { method: 'PUT', body, auth: true }),
   createLeaderboardEntry: (body) =>
     fetchJson('/admin/leaderboard', { method: 'POST', body, auth: true }),
   updateLeaderboardEntry: (id, body) =>

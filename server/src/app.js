@@ -6,6 +6,7 @@ import questionRoutes from './routes/questionRoutes.js';
 import leaderboardRoutes from './routes/leaderboardRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import winnerRoutes from './routes/winnerRoutes.js';
 import { connectDB } from './config/db.js';
 import { seedDatabase } from './seed.js';
 
@@ -22,7 +23,7 @@ app.use(
     optionsSuccessStatus: 200,
   })
 );
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
@@ -31,6 +32,7 @@ app.get('/api/health', (_req, res) => {
 app.use('/api', challengeRoutes);
 app.use('/api', questionRoutes);
 app.use('/api', leaderboardRoutes);
+app.use('/api', winnerRoutes);
 app.use('/api', authRoutes);
 app.use('/api', adminRoutes);
 

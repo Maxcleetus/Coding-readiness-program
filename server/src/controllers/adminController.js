@@ -1,9 +1,11 @@
 import Challenge from '../models/Challenge.js';
 import Question from '../models/Question.js';
 import LeaderboardEntry from '../models/LeaderboardEntry.js';
+import CompetitionWinner from '../models/CompetitionWinner.js';
 
 const normalizeChallengeId = (value) => (value || '').trim();
 const normalizeQuestionId = (value) => (value || '').trim();
+const normalizeWinnerName = (value) => (value || '').trim();
 
 const recalculateRanksByType = async (type) => {
   const entries = await LeaderboardEntry.find({ type })
@@ -38,13 +40,48 @@ const recalculateRanksByType = async (type) => {
 
 export const getAdminOverview = async (_req, res, next) => {
   try {
-    const [challenges, questions, leaderboard] = await Promise.all([
+    const [challenges, questions, leaderboard, competitionWinner] = await Promise.all([
       Challenge.find().sort({ createdAt: -1 }).lean(),
       Question.find().sort({ questionId: 1 }).lean(),
       LeaderboardEntry.find().sort({ type: 1, rank: 1 }).lean(),
+      CompetitionWinner.findOne().lean(),
     ]);
 
-    return res.json({ challenges, questions, leaderboard });
+    return res.json({ challenges, questions, leaderboard, competitionWinner });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const updateCompetitionWinner = async (req, res, next) => {
+  try {
+    const name = normalizeWinnerName(req.body.name);
+    const imageData = String(req.body.imageData || '').trim();
+
+    if (!name) {
+      return res.status(400).json({ message: 'Winner name is required' });
+    }
+
+    if (!imageData.startsWith('data:image/')) {
+      return res.status(400).json({ message: 'Winner image must be an uploaded image' });
+    }
+
+    const winner = await CompetitionWinner.findOneAndUpdate(
+      { singletonKey: 'competition-winner' },
+      {
+        $set: {
+          name,
+          imageData,
+        },
+      },
+      {
+        new: true,
+        upsert: true,
+        setDefaultsOnInsert: true,
+      }
+    ).lean();
+
+    return res.json(winner);
   } catch (error) {
     return next(error);
   }
@@ -137,6 +174,7 @@ export const createQuestion = async (req, res, next) => {
       description: req.body.description,
       snippet: req.body.snippet,
       link: req.body.link,
+      videoLink: req.body.videoLink,
     });
 
     return res.status(201).json(created);
@@ -162,6 +200,7 @@ export const updateQuestion = async (req, res, next) => {
     if (updates.description !== undefined) question.description = updates.description;
     if (updates.snippet !== undefined) question.snippet = updates.snippet;
     if (updates.link !== undefined) question.link = updates.link;
+    if (updates.videoLink !== undefined) question.videoLink = updates.videoLink;
 
     await question.save();
     return res.json(question);

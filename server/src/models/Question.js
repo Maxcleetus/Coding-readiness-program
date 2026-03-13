@@ -18,6 +18,11 @@ const questionSchema = new mongoose.Schema(
       trim: true,
       default: 'https://leetcode.com/problemset/',
     },
+    videoLink: {
+      type: String,
+      trim: true,
+      default: '',
+    },
   },
   { timestamps: true }
 );

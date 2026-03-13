@@ -50,4 +50,5 @@ export const api = {
   getTodayChallenge: () => fetchJson('/today-challenge'),
   getQuestions: (params) => fetchJson('/questions', { params }),
   getLeaderboard: (type) => fetchJson('/leaderboard', { params: { type } }),
+  getCompetitionWinner: () => fetchJson('/competition-winner'),
 };

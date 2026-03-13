@@ -34,10 +34,24 @@ const LeaderBoard = () => {
     loadBoard();
   }, []);
 
+  const currentData = activeTab === 'students' ? studentData : groupData;
+  // This ensures we always show at least 5 if they exist
+  const visibleData = isExpanded ? currentData : currentData.slice(0, 5);
+
   // Animation logic
   useEffect(() => {
+    if (isLoading || error || visibleData.length === 0) {
+      return undefined;
+    }
+
     const ctx = gsap.context(() => {
-      gsap.from(".board-item", {
+      const items = gsap.utils.toArray('.board-item', containerRef.current);
+
+      if (items.length === 0) {
+        return;
+      }
+
+      gsap.from(items, {
         y: 15,
         opacity: 0,
         stagger: 0.05,
@@ -47,11 +61,7 @@ const LeaderBoard = () => {
       });
     }, containerRef);
     return () => ctx.revert();
-  }, [activeTab, isExpanded]);
-
-  const currentData = activeTab === 'students' ? studentData : groupData;
-  // This ensures we always show at least 5 if they exist
-  const visibleData = isExpanded ? currentData : currentData.slice(0, 5);
+  }, [activeTab, isExpanded, isLoading, error, visibleData.length]);
 
   return (
     <div ref={containerRef} className="min-h-screen bg-[#030303] text-white pt-32 pb-20 px-6 font-sans">

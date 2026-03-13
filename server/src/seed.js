@@ -2,14 +2,21 @@ import bcrypt from 'bcryptjs';
 import Challenge from './models/Challenge.js';
 import Question from './models/Question.js';
 import LeaderboardEntry from './models/LeaderboardEntry.js';
+import CompetitionWinner from './models/CompetitionWinner.js';
 import AdminUser from './models/AdminUser.js';
-import { challengeSeed, leaderboardSeed, questionSeed } from './data/seedData.js';
+import {
+  challengeSeed,
+  competitionWinnerSeed,
+  leaderboardSeed,
+  questionSeed,
+} from './data/seedData.js';
 
 export const seedDatabase = async () => {
-  const [challengeCount, questionCount, leaderboardCount] = await Promise.all([
+  const [challengeCount, questionCount, leaderboardCount, competitionWinnerCount] = await Promise.all([
     Challenge.countDocuments(),
     Question.countDocuments(),
     LeaderboardEntry.countDocuments(),
+    CompetitionWinner.countDocuments(),
   ]);
 
   const jobs = [];
@@ -24,6 +31,10 @@ export const seedDatabase = async () => {
 
   if (leaderboardCount === 0) {
     jobs.push(LeaderboardEntry.insertMany(leaderboardSeed));
+  }
+
+  if (competitionWinnerCount === 0) {
+    jobs.push(CompetitionWinner.create(competitionWinnerSeed));
   }
 
   const username = (process.env.ADMIN_USERNAME || 'admin').trim();
@@ -56,16 +67,34 @@ export const seedDatabase = async () => {
     console.log('Seed data inserted');
   }
 
-  // Backfill links for existing question records created before link support.
+  // Backfill URLs for existing question records created before link/videoLink support.
   await Promise.all(
-    questionSeed.map((seedQuestion) =>
+    questionSeed.flatMap((seedQuestion) => [
       Question.updateOne(
         {
           questionId: seedQuestion.questionId,
           $or: [{ link: { $exists: false } }, { link: null }, { link: '' }],
         },
         { $set: { link: seedQuestion.link } }
-      )
-    )
+      ),
+      Question.updateOne(
+        {
+          questionId: seedQuestion.questionId,
+          $or: [{ videoLink: { $exists: false } }, { videoLink: null }, { videoLink: '' }],
+        },
+        { $set: { videoLink: seedQuestion.videoLink } }
+      ),
+    ])
+  );
+
+  await CompetitionWinner.updateOne(
+    { singletonKey: 'competition-winner' },
+    {
+      $setOnInsert: {
+        name: competitionWinnerSeed.name,
+        imageData: competitionWinnerSeed.imageData,
+      },
+    },
+    { upsert: true }
   );
 };

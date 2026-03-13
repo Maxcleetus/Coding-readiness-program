@@ -1,6 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './lib/api';
 
+const emptyCompetitionWinner = {
+  name: '',
+  imageData: '',
+};
+
 const emptyChallenge = {
   challengeId: '',
   title: '',
@@ -20,6 +25,7 @@ const emptyQuestion = {
   description: '',
   snippet: '',
   link: '',
+  videoLink: '',
 };
 
 const emptyEntry = {
@@ -34,6 +40,24 @@ const SectionTitle = ({ children }) => (
   <h2 className="text-xl md:text-2xl font-semibold text-white tracking-tight">{children}</h2>
 );
 
+const readImageAsDataUrl = (file) =>
+  new Promise((resolve, reject) => {
+    if (!file) {
+      resolve('');
+      return;
+    }
+
+    if (!file.type.startsWith('image/')) {
+      reject(new Error('Please choose an image file'));
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Failed to read the selected image'));
+    reader.readAsDataURL(file);
+  });
+
 const Admin = () => {
   const [token, setToken] = useState(api.getAuthToken());
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +66,7 @@ const Admin = () => {
 
   const [credentials, setCredentials] = useState({ username: '', password: '' });
 
+  const [competitionWinner, setCompetitionWinner] = useState(emptyCompetitionWinner);
   const [challenges, setChallenges] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [entries, setEntries] = useState([]);
@@ -61,6 +86,7 @@ const Admin = () => {
 
     try {
       const data = await api.getAdminOverview();
+      setCompetitionWinner(data.competitionWinner || emptyCompetitionWinner);
       setChallenges(data.challenges || []);
       setQuestions(data.questions || []);
       setEntries(data.leaderboard || []);
@@ -103,10 +129,40 @@ const Admin = () => {
   const handleLogout = () => {
     api.clearAuthToken();
     setToken('');
+    setCompetitionWinner(emptyCompetitionWinner);
     setChallenges([]);
     setQuestions([]);
     setEntries([]);
     resetMessages();
+  };
+
+  const handleCompetitionWinnerImageChange = async (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    resetMessages();
+
+    try {
+      const imageData = await readImageAsDataUrl(file);
+      setCompetitionWinner((prev) => ({ ...prev, imageData }));
+    } catch (err) {
+      setError(err.message || 'Failed to load image');
+    }
+  };
+
+  const saveCompetitionWinner = async () => {
+    resetMessages();
+
+    try {
+      await api.updateCompetitionWinner(competitionWinner);
+      setSuccess('Competition winner updated');
+      await fetchOverview();
+    } catch (err) {
+      setError(err.message || 'Failed to save competition winner');
+    }
   };
 
   const updateListItem = (setter, list, id, key, value) => {
@@ -167,6 +223,7 @@ const Admin = () => {
         description: item.description,
         snippet: item.snippet,
         link: item.link,
+        videoLink: item.videoLink,
       });
       setSuccess(`Saved question ${item.questionId}`);
       await fetchOverview();
@@ -293,6 +350,54 @@ const Admin = () => {
         {isLoading && <div className="text-sm text-gray-400">Loading data...</div>}
 
         <section className="space-y-4">
+          <SectionTitle>Competition Winner</SectionTitle>
+          <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-6 border border-white/10 rounded-2xl p-5 bg-white/[0.02]">
+            <div className="space-y-4">
+              <input
+                placeholder="Winner Name"
+                value={competitionWinner.name}
+                onChange={(e) => setCompetitionWinner((prev) => ({ ...prev, name: e.target.value }))}
+                className="w-full bg-black border border-white/15 rounded-lg px-3 py-2"
+              />
+              <label className="block">
+                <span className="block text-xs uppercase tracking-[0.24em] text-gray-500 mb-2">Winner Photo</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCompetitionWinnerImageChange}
+                  className="w-full bg-black border border-white/15 rounded-lg px-3 py-2 text-sm text-gray-300 file:mr-3 file:border-0 file:bg-white file:px-3 file:py-1.5 file:rounded file:text-black"
+                />
+              </label>
+              <button
+                onClick={saveCompetitionWinner}
+                className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm"
+              >
+                Save Winner Section
+              </button>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+              <div className="aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-[#08111d]">
+                {competitionWinner.imageData ? (
+                  <img
+                    src={competitionWinner.imageData}
+                    alt={competitionWinner.name || 'Competition winner preview'}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-sm text-gray-500">
+                    Upload a winner image
+                  </div>
+                )}
+              </div>
+              <p className="mt-4 text-center text-2xl font-medium tracking-tight">
+                {competitionWinner.name || 'Winner name'}
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="space-y-4">
           <SectionTitle>Challenges</SectionTitle>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <input placeholder="Challenge ID" value={newChallenge.challengeId} onChange={(e) => setNewChallenge((p) => ({ ...p, challengeId: e.target.value }))} className="bg-black border border-white/15 rounded-lg px-3 py-2" />
@@ -347,7 +452,8 @@ const Admin = () => {
             <input placeholder="Category" value={newQuestion.category} onChange={(e) => setNewQuestion((p) => ({ ...p, category: e.target.value }))} className="bg-black border border-white/15 rounded-lg px-3 py-2" />
             <textarea placeholder="Description" value={newQuestion.description} onChange={(e) => setNewQuestion((p) => ({ ...p, description: e.target.value }))} className="bg-black border border-white/15 rounded-lg px-3 py-2 min-h-20 lg:col-span-2" />
             <input placeholder="Snippet" value={newQuestion.snippet} onChange={(e) => setNewQuestion((p) => ({ ...p, snippet: e.target.value }))} className="bg-black border border-white/15 rounded-lg px-3 py-2 lg:col-span-2" />
-            <input placeholder="LeetCode Link" value={newQuestion.link} onChange={(e) => setNewQuestion((p) => ({ ...p, link: e.target.value }))} className="bg-black border border-white/15 rounded-lg px-3 py-2 lg:col-span-2" />
+            <input placeholder="LeetCode Link" value={newQuestion.link} onChange={(e) => setNewQuestion((p) => ({ ...p, link: e.target.value }))} className="bg-black border border-white/15 rounded-lg px-3 py-2" />
+            <input placeholder="YouTube Solution Link" value={newQuestion.videoLink} onChange={(e) => setNewQuestion((p) => ({ ...p, videoLink: e.target.value }))} className="bg-black border border-white/15 rounded-lg px-3 py-2" />
           </div>
           <button onClick={addQuestion} className="px-4 py-2 rounded-lg bg-blue-500 text-white text-sm">Add Question</button>
 
@@ -362,7 +468,8 @@ const Admin = () => {
                   </select>
                   <input value={item.category} onChange={(e) => updateListItem(setQuestions, questions, item._id, 'category', e.target.value)} className="bg-black border border-white/15 rounded px-2 py-2" />
                   <input value={item.snippet} onChange={(e) => updateListItem(setQuestions, questions, item._id, 'snippet', e.target.value)} className="bg-black border border-white/15 rounded px-2 py-2 lg:col-span-3" />
-                  <input value={item.link || ''} onChange={(e) => updateListItem(setQuestions, questions, item._id, 'link', e.target.value)} className="bg-black border border-white/15 rounded px-2 py-2 lg:col-span-4" />
+                  <input value={item.link || ''} onChange={(e) => updateListItem(setQuestions, questions, item._id, 'link', e.target.value)} className="bg-black border border-white/15 rounded px-2 py-2 lg:col-span-2" />
+                  <input value={item.videoLink || ''} onChange={(e) => updateListItem(setQuestions, questions, item._id, 'videoLink', e.target.value)} className="bg-black border border-white/15 rounded px-2 py-2 lg:col-span-2" />
                 </div>
                 <textarea value={item.description} onChange={(e) => updateListItem(setQuestions, questions, item._id, 'description', e.target.value)} className="w-full min-h-20 bg-black border border-white/15 rounded px-2 py-2" />
                 <div className="flex gap-3">

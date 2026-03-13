@@ -7,6 +7,7 @@ import {
   deleteLeaderboardEntry,
   deleteQuestion,
   getAdminOverview,
+  updateCompetitionWinner,
   updateChallenge,
   updateLeaderboardEntry,
   updateQuestion,
@@ -18,6 +19,7 @@ const router = Router();
 router.use('/admin', requireAuth);
 
 router.get('/admin/overview', getAdminOverview);
+router.put('/admin/competition-winner', updateCompetitionWinner);
 
 router.post('/admin/challenges', createChallenge);
 router.put('/admin/challenges/:id', updateChallenge);
@@ -32,4 +34,3 @@ router.put('/admin/leaderboard/:id', updateLeaderboardEntry);
 router.delete('/admin/leaderboard/:id', deleteLeaderboardEntry);
 
 export default router;
-

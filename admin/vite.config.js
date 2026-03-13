@@ -4,8 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const proxyTarget =
-    env.VITE_API_PROXY_TARGET || 'https://coding-readiness-program-xkuc.vercel.app';
+  const proxyTarget = env.VITE_API_PROXY_TARGET || 'http://localhost:5000';
 
   return {
     plugins: [react(), tailwindcss()],
@@ -15,7 +14,7 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: proxyTarget,
           changeOrigin: true,
-          secure: true,
+          secure: false,
         },
       },
     },

@@ -54,13 +54,23 @@ const Navbar = () => {
                 <div className="flex items-center justify-between">
                     {/* Logo Section */}
                     <div
-                        className="flex flex-col cursor-pointer group"
+                        className="flex items-center gap-3 cursor-pointer group"
                         onClick={() => navigate('/')}
                     >
-                        <div className="h-px w-12 bg-gradient-to-r from-blue-500 to-transparent mb-1.5 group-hover:w-20 transition-all duration-500"></div>
-                        <span className="text-[10px] font-medium text-gray-400 tracking-[0.3em] uppercase transition-colors group-hover:text-blue-400">
-                            Coding Readiness
-                        </span>
+                        <img 
+                            src="/logo.png" 
+                            alt="Coding Readiness Logo" 
+                            className="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
+                        />
+                        <div className="flex flex-col">
+                            <div className="h-px w-12 bg-gradient-to-r from-blue-500 to-transparent mb-1 group-hover:w-20 transition-all duration-500"></div>
+                            <span className="text-[11px] font-semibold text-white tracking-[0.25em] uppercase transition-colors group-hover:text-blue-400">
+                                Coding Readiness
+                            </span>
+                            <span className="text-[8px] font-medium text-gray-500 tracking-[0.2em] uppercase">
+                                RIT Kottayam
+                            </span>
+                        </div>
                     </div>
 
                     {/* Desktop Navigation */}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Github, Twitter, Linkedin, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 
 const Footer = () => {
     const navigate = useNavigate();
@@ -21,37 +21,40 @@ const Footer = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-16 mb-20">
 
                     {/* Left Side: Brand Info */}
-                    <div className="space-y-8">
+                    <div className="space-y-6">
                         <div
-                            className="flex items-center gap-2 cursor-pointer group"
+                            className="flex items-center gap-3 cursor-pointer group"
                             onClick={() => navigate('/')}
                         >
-                            <div
-                                className="flex flex-col cursor-pointer group"
-                                onClick={() => navigate('/')}
-                            >
-                                <div className="h-px w-12 bg-gradient-to-r from-blue-500 to-transparent mb-1.5 group-hover:w-20 transition-all duration-500"></div>
-                                <span className="text-[15px] font-medium text-gray-400 tracking-[0.3em] uppercase transition-colors group-hover:text-blue-400">
+                            <img 
+                                src="/logo.png" 
+                                alt="Coding Readiness Logo" 
+                                className="h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
+                            />
+                            <div className="flex flex-col">
+                                <div className="h-px w-12 bg-gradient-to-r from-blue-500 to-transparent mb-1 group-hover:w-20 transition-all duration-500"></div>
+                                <span className="text-[16px] font-semibold text-white tracking-[0.25em] uppercase transition-colors group-hover:text-blue-400">
                                     Coding Readiness
+                                </span>
+                                <span className="text-[9px] font-medium text-gray-500 tracking-[0.2em] uppercase">
+                                    RIT Kottayam
                                 </span>
                             </div>
                         </div>
 
-                        <p className="text-gray-500 text-sm md:text-base leading-relaxed max-w-sm">
+                        <p className="text-gray-400 text-sm leading-relaxed max-w-sm">
                             Architecting the next generation of engineers through
                             mental models and pattern-based technical training.
                         </p>
 
-                        <div className="flex gap-4">
-                            {[Github, Twitter, Linkedin].map((Icon, idx) => (
-                                <a
-                                    key={idx}
-                                    href="#"
-                                    className="w-10 h-10 rounded-full border border-white/5 bg-white/[0.02] flex items-center justify-center text-gray-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all"
-                                >
-                                    <Icon size={18} />
-                                </a>
-                            ))}
+                        <div className="border-l-2 border-blue-500/50 pl-4 py-1.5 space-y-1">
+                            <p className="text-gray-500 text-[10px] tracking-widest uppercase font-bold">Venue & Host</p>
+                            <p className="text-gray-200 text-sm font-semibold">
+                                Rajiv Gandhi Institute of Technology (RIT)
+                            </p>
+                            <p className="text-gray-400 text-xs">
+                                Government Engineering College, Kottayam, Kerala
+                            </p>
                         </div>
                     </div>
 
@@ -75,12 +78,23 @@ const Footer = () => {
                         </div>
 
                         <div className="space-y-6">
-                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">Trust</h3>
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-600">Institution</h3>
                             <ul className="space-y-4">
-                                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Terms of Service</a></li>
-                                <li><a href="#" className="text-gray-400 hover:text-white transition-colors text-sm font-medium">Privacy Policy</a></li>
-                                <li className="flex items-center gap-2 text-blue-500/80 text-[10px] font-bold tracking-widest uppercase mt-4">
-                                    <ShieldCheck size={14} /> Certified Prep
+                                <li>
+                                    <a 
+                                        href="https://www.rit.ac.in/" 
+                                        target="_blank" 
+                                        rel="noopener noreferrer" 
+                                        className="text-gray-400 hover:text-white transition-colors text-sm font-medium flex items-center gap-1 group"
+                                    >
+                                        RIT Website
+                                        <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 -translate-y-1 translate-x-1 transition-all" />
+                                    </a>
+                                </li>
+                                <li>
+                                    <span className="text-gray-400 text-sm font-medium">
+                                        Dept. of Computer Science
+                                    </span>
                                 </li>
                             </ul>
                         </div>
